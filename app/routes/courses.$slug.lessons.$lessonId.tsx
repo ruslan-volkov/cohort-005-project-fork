@@ -45,7 +45,10 @@ import { ChevronLeft, ChevronRight, Clock, Github } from "lucide-react";
 import { formatDuration } from "~/lib/utils";
 import { renderMarkdown } from "~/lib/markdown.server";
 import { YouTubePlayer } from "~/components/youtube-player";
-import { LessonWrapUp } from "~/components/lesson-wrap-up";
+import {
+  LessonWrapUp,
+  markCompleteFetcherKey,
+} from "~/components/lesson-wrap-up";
 import { lessonWrapUp } from "~/modules/lesson-wrap-up";
 import { useAutoplay } from "~/components/use-autoplay";
 import { LockedLesson } from "~/components/lesson-locked";
@@ -429,7 +432,7 @@ function FullLesson({
     note,
   } = data;
   const [autoplay, toggleAutoplay] = useAutoplay();
-  const fetcher = useFetcher({ key: `mark-complete-${lesson.id}` });
+  const fetcher = useFetcher({ key: markCompleteFetcherKey(lesson.id) });
   const quizFetcher = useFetcher({ key: `quiz-${lesson.id}` });
   const navigate = useNavigate();
 
@@ -443,7 +446,6 @@ function FullLesson({
     nextLesson,
   });
 
-  // Navigate to next lesson after marking complete
   useEffect(() => {
     if (justCompleted && nextLesson) {
       navigate(`/courses/${course.slug}/lessons/${nextLesson.id}`);
@@ -541,7 +543,6 @@ function FullLesson({
             />
           )}
 
-          {/* Note and Mark Complete / Up Next, together at the foot of the lesson */}
           {wrapUp && (
             <LessonWrapUp
               wrapUp={wrapUp}

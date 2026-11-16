@@ -10,7 +10,12 @@ export type WrapUp = {
   completion: CompletionStep | null;
 };
 
-export function decideWrapUp(input: {
+/**
+ * What the panel at the foot of a lesson shows: the Student's private note
+ * and the step that finishes the lesson, side by side, so writing a note and
+ * moving on happen in one place.
+ */
+export function lessonWrapUp(input: {
   signedIn: boolean;
   enrolled: boolean;
   completed: boolean;

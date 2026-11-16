@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Link, useFetcher } from "react-router";
 import { CheckCircle2, ChevronRight, NotebookPen } from "lucide-react";
 import type { CompletionStep, WrapUp } from "~/modules/lesson-wrap-up";
@@ -7,6 +8,14 @@ import { Textarea } from "~/components/ui/textarea";
 import { formatRelativeTime } from "~/lib/utils";
 
 type Note = { body: string; updatedAt: string } | null;
+
+/**
+ * The route watches this fetcher to move on to the next lesson once marking
+ * complete succeeds, so both sides must use the same key.
+ */
+export function markCompleteFetcherKey(lessonId: number) {
+  return `mark-complete-${lessonId}`;
+}
 
 /**
  * The panel at the foot of a lesson: the Student's private note, with the
@@ -24,17 +33,14 @@ export function LessonWrapUp({
   courseSlug: string;
 }) {
   const noteFetcher = useFetcher<{ ok: boolean; error?: string }>();
+  const noteFormId = useId();
   const isSaving = noteFetcher.state !== "idle";
   const error = noteFetcher.data?.error;
 
   return (
     <Card className="mb-8" data-testid="lesson-wrap-up">
       <CardContent className="space-y-3 pt-6">
-        <noteFetcher.Form
-          method="post"
-          id="lesson-note-form"
-          className="space-y-3"
-        >
+        <noteFetcher.Form method="post" id={noteFormId} className="space-y-3">
           <input type="hidden" name="intent" value="save-note" />
           <NoteField note={note} />
         </noteFetcher.Form>
@@ -43,7 +49,7 @@ export function LessonWrapUp({
           <div className="flex items-center gap-3">
             <Button
               type="submit"
-              form="lesson-note-form"
+              form={noteFormId}
               size="sm"
               variant="outline"
               disabled={isSaving}
@@ -107,9 +113,7 @@ function CompletionAction({
   lessonId: number;
   courseSlug: string;
 }) {
-  // Shares its key with the route, which moves on to the next lesson once
-  // this submission succeeds.
-  const fetcher = useFetcher({ key: `mark-complete-${lessonId}` });
+  const fetcher = useFetcher({ key: markCompleteFetcherKey(lessonId) });
   const isMarking =
     fetcher.state !== "idle" &&
     fetcher.formData?.get("intent") === "mark-complete";
